@@ -7,9 +7,12 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    SECRET_KEY: str
+    ALGORITHM: str
 
     class Config:
-        env_file = r"server\.env"
+        env_file = ".env"
 
 
 @lru_cache

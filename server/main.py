@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .routes import user as user_routes
-from .core.db import ENGINE, ORM_BASE
+from .helpers.db_conf import ENGINE, ORM_BASE
+from .routes import user_router, car_router, order_router
 
 
 @asynccontextmanager
@@ -19,7 +19,9 @@ app = FastAPI(
     root_path="/api/server",
 )
 
-app.include_router(user_routes.router)
+app.include_router(user_router)
+app.include_router(car_router)
+app.include_router(order_router)
 
 
 @app.get("/", tags=["Root"])
