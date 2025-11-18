@@ -1,5 +1,3 @@
-# --- HASHING FUNCTIONS (hash_password, verify_password) ARE REMOVED ---
-# --- BCRYPT IMPORT IS REMOVED ---
 from typing import Optional
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException, status
