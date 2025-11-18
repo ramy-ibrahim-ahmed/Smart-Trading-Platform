@@ -1,4 +1,3 @@
-from google.generativeai.types import ContentsType, PartType
 from ..store import BaseNLP, BaseVectorDB, PromptFactory
 from ..core import get_settings, ManyCars, TaskModelConfig
 
