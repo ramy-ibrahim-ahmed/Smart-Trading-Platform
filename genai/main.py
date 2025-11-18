@@ -7,9 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from .store import NLPFactory, VectorDBFactory
 from .core import get_settings
 from .routers import text, stt, tts
+from .agents import DescripeAgent
 
 RABBITMQ_URL = "amqp://guest:guest@rabbitmq:5672/"
 QUEUE_NAME = "db_export_queue"
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -25,15 +30,33 @@ async def lifespan(app: FastAPI):
     vectordb = vectordb_factory.create("qdrant")
     vectordb.connect()
     app.state.vectordb = vectordb
+    # vectordb.create_collection(SETTINGS.CARS_COLLECTION)
 
     app.state.rabbit_conn = await aio_pika.connect_robust(RABBITMQ_URL)
     channel = await app.state.rabbit_conn.channel()
     queue = await channel.declare_queue(QUEUE_NAME, durable=True)
+    desc_agent = DescripeAgent(nlp, vectordb)
 
     async def process_message(message: aio_pika.IncomingMessage):
         async with message.process():
-            data = json.loads(message.body.decode())
-            print(data)
+            try:
+                logger.info("Received message from queue")
+                data = json.loads(message.body.decode())
+                cars = data["cars"]
+                cleaned_strings = []
+                ids = []
+                for car in cars:
+                    car.pop("_sa_instance_state", None)
+                    ids.append(car.pop("id", None))
+                    cleaned_strings.append(
+                        json.dumps(car, ensure_ascii=False, indent=2)
+                    )
+                descs = await desc_agent.descripe_cars(cleaned_strings)
+                await desc_agent.process_cars(SETTINGS.CARS_COLLECTION, descs, ids)
+                logger.info(f"Processed {len(cars)} cars and stored in vector DB")
+            except Exception as e:
+                logger.error(f"Error processing message: {str(e)}", exc_info=True)
+                raise
 
     await queue.consume(process_message, no_ack=False)
 
