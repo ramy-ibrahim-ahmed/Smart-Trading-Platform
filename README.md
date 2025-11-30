@@ -2,4 +2,4 @@
 
 ## Stystem Architecture
 
-!["arch"](docs\arch.png)
+!["arch"](docs/arch.png)
