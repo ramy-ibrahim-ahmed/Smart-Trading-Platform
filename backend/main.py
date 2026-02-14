@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
         await channel.default_exchange.publish(message, routing_key=QUEUE_NAME)
         print("DB data sent to queue")
 
-    scheduler.add_job(export_db_data, IntervalTrigger(minutes=1))
+    scheduler.add_job(export_db_data, IntervalTrigger(minutes=1), misfire_grace_time=30)
     await seed_database()
 
     yield

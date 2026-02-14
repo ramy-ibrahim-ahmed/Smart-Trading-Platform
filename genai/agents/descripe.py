@@ -1,6 +1,7 @@
 from ..store import BaseNLP, BaseVectorDB, PromptFactory
 from ..core import get_settings, TaskModelConfig
 
+
 SETTINGS = get_settings()
 
 
